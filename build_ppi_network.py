@@ -43,6 +43,8 @@ def read_protein_links():
             continue
         # Update edge dictionary.
         protein_edge_set.add(edge)
+        if len(protein_edge_set) == 100: # TODO
+            break
     f.close()
     return protein_edge_set, protein_set
 
@@ -71,7 +73,7 @@ def write_network(protein_edge_set, protein_set, net_type):
     net_out.write('0\n%d\n' % num_nodes)
 
     # "Real" evaluation network.
-    real_out = open('%s/eval_network_%s.txt' % (data_folder, net_type), 'w')
+    real_out = open('%s/real_network_%s.txt' % (data_folder, net_type), 'w')
     real_out.write('Real network\n')
 
     for (p_1, p_2) in protein_edge_set:

@@ -3,7 +3,8 @@ Author: Edward Huang
 
 ## Data Pre-processing
 
-1.
+1.  Generate directories for further pre-processing.
+
     ```bash
     python generate_directories.py
     ```
@@ -16,7 +17,31 @@ Author: Edward Huang
 
 ## Network generation
 
-1.  
+1.  Create the network to be clustered on by simulated annealing.
+
     ```bash
     python build_ppi_network.py <species>
+    ```
+
+## Clustering
+
+1.  Compile simulated annealing with WlogV objective function code.
+
+    ```bash
+    $ cd makedir
+    $ rm *
+    $ cmake ..
+    $ make
+    ```
+
+2.  Run simulated annealing script.
+
+    ```bash
+    python simulated_annealing.py <species> <network_type> <n_clusters>
+    ```
+
+3.  Evaluate clusters.
+
+    ```bash
+    python density_analysis.py <species> <n_clusters>
     ```
