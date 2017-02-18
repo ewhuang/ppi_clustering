@@ -1,6 +1,7 @@
 ### Author: Edward Huang
 
-from file_operations import read_oncogenic_signatures
+from file_operations import read_oncogenic_signatures, read_external_to_ensp_dct
+import json
 import os
 import sys
 import time
@@ -43,8 +44,6 @@ def read_protein_links():
             continue
         # Update edge dictionary.
         protein_edge_set.add(edge)
-        if len(protein_edge_set) == 100: # TODO
-            break
     f.close()
     return protein_edge_set, protein_set
 
@@ -95,6 +94,39 @@ def write_network(protein_edge_set, protein_set, net_type):
     # Write out an aribtrary protein to the orthology file.
     write_orth_file(p_1)
 
+def dump_dbgap_dct(protein_set):
+    '''
+    Dumps the DBGAP annotation dictionary out to file.
+    Key: DBGAP ID -> str
+    Value: list of proteins -> list(str)
+    '''
+    ensg_to_ensp_dct = read_external_to_ensp_dct('ensg')
+
+    dbgap_dct = {}
+    f = open('./data/dbgap.txt', 'r')
+    for line in f:
+        dbgap_id, ensg_id, bloat_1, bloat_2 = line.split()
+
+        if ensg_id not in ensg_to_ensp_dct:
+            continue
+        ensp_set = ensg_to_ensp_dct[ensg_id]
+
+        ensp_set = list(ensp_set.intersection(protein_set))
+        if len(ensp_set) == 0: # Skip if it shares no proteins with the network.
+            continue
+        if dbgap_id not in dbgap_dct:
+            dbgap_dct[dbgap_id] = []
+        dbgap_dct[dbgap_id] += ensp_set
+    f.close()
+
+    # Remove duplicates.
+    for dbgap_id in dbgap_dct:
+        dbgap_dct[dbgap_id] = list(set(dbgap_dct[dbgap_id]))
+
+    with open('%s/dbgap_dct.json' % data_folder, 'w') as fp:
+        json.dump(dbgap_dct, fp)
+    fp.close()
+
 def main():
     if len(sys.argv) != 2:
         print 'Usage: python %s <species>' % sys.argv[0]
@@ -109,6 +141,9 @@ def main():
 
     write_network(protein_edge_set, protein_set, 'none')
     write_network(protein_edge_set, protein_set, 'msigdb')
+
+    # Also take this opportunity to dump the DBGAP dictionary.
+    dump_dbgap_dct(protein_set)
 
 if __name__ == '__main__':
     start_time = time.time()

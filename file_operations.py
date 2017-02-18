@@ -2,27 +2,26 @@
 
 ### Contains functions that read globally used files.
 
-def read_entrez_to_ensp_dct():
+def read_external_to_ensp_dct(external_id_type):
     '''
-    Returns the mappings from entrez to ENSP as a dictionary.
-    Key: EntrezGene ID -> str
+    Returns the mappings from external to ENSP as a dictionary.
+    Key: externalGene ID -> str
     Value: set of ensembl protein IDs (ENSP) -> set(str)
     '''
-    entrez_to_ensp_dct = {}
-    f = open('./data/ensp_to_entrez.txt', 'r')
+    external_to_ensp_dct = {}
+    f = open('./data/ensp_to_%s.txt' % external_id_type, 'r')
     for i, line in enumerate(f):
         if i == 0: # Skip header line.
             continue
         line = line.split()
         if len(line) != 2:
             continue
-        ensp_id, entrez_id = line
-        assert entrez_id.isdigit()
-        if entrez_id not in entrez_to_ensp_dct:
-            entrez_to_ensp_dct[entrez_id] = set([])
-        entrez_to_ensp_dct[entrez_id].add(ensp_id)
+        ensp_id, external_id = line
+        if external_id not in external_to_ensp_dct:
+            external_to_ensp_dct[external_id] = set([])
+        external_to_ensp_dct[external_id].add(ensp_id)
     f.close()
-    return entrez_to_ensp_dct
+    return external_to_ensp_dct
 
 def read_oncogenic_signatures(ppi_protein_set):
     '''
@@ -30,7 +29,7 @@ def read_oncogenic_signatures(ppi_protein_set):
     Key: Cellular pathways that are often dis-regulated in cancer -> str
     Value: sets of genes -> set(str)
     '''
-    entrez_to_ensp_dct = read_entrez_to_ensp_dct()
+    entrez_to_ensp_dct = read_external_to_ensp_dct('entrez')
     oncogenic_signature_dct = {}
     f = open('./data/c6.all.v5.2.entrez.gmt', 'r')
     for line in f:
@@ -50,3 +49,28 @@ def read_oncogenic_signatures(ppi_protein_set):
         oncogenic_signature_dct[gene_set_name] = mapped_gene_set
     f.close()
     return oncogenic_signature_dct
+
+def get_cluster_dictionary(filename):
+    '''
+    Returns a dictionary of clusters.
+    Key: cluster ID -> str
+    Value: lists of genes in the cluster-> list(str)
+    '''
+    cluster_dct = {}
+    f = open(filename, 'r')
+    # Read in the cluster file to create the cluster dictionary.
+    for i, line in enumerate(f):
+        if i == 0:
+            continue
+        newline = line.strip().split('\t')
+        cluster = newline[2][len('Cluster '):]
+        # Skip garbage clusters.
+        if cluster == '0':
+            continue
+        gene = newline[1][len('Gene '):]
+        assert 'ENSP' in gene
+        if cluster not in cluster_dct:
+            cluster_dct[cluster] = []
+        cluster_dct[cluster] += [gene]
+    f.close()
+    return cluster_dct

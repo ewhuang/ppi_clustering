@@ -13,7 +13,9 @@ Author: Edward Huang
 
 3.  Download MSigDB oncogenic gene sets. Go to [MSigDB](http://software.broadinstitute.org/gsea/msigdb/collections.jsp#C6). Click Download entrez gene ids. Obtain c6.all.v5.2.entrez.gmt. Move to ./data/
 
-2.  Download mappings from Entrez to ENSG IDs. Go to [biomart](http://www.ensembl.org/biomart/martview/). Choose Ensembl Genes 87, Human Genes, Attributes, uncheck Gene and Transcript ID, check Protein ID and EntrezGeneID, click Results, check Unique results only, and click Go. Downloaded file will be named mart_export.txt, rename to ensp_to_entrez.txt, move to ./data/
+4.  Download mappings from Entrez to ENSG IDs. Go to [biomart](http://www.ensembl.org/biomart/martview/). Choose Ensembl Genes 87, Human Genes, Attributes, uncheck Gene and Transcript ID, check Protein ID and EntrezGeneID, click Results, check Unique results only, and click Go. Downloaded file will be named mart_export.txt, rename to ensp_to_entrez.txt, move to ./data/
+
+5.  To get DBGAP, go to http://veda.cs.uiuc.edu/TCGA_classify/msigdb/gene_sets/dbgap_all/, download dbgap.edge, and rename to dbgap.txt. Move to ./data/. Get the ENSP to ENSG mappings. ENSP must be in the first column. Same method as in retrieving EntrezID mappings.
 
 ## Network generation
 
